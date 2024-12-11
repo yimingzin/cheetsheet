@@ -6,7 +6,7 @@ from tqdm.auto import tqdm
 from typing import Dict, Tuple, List
 
 def train_step(
-    epochs: int,
+    current_epoch: int,
     model: torch.nn.Module,
     train_dataloader: torch.utils.data.DataLoader,
     loss_func: torch.nn.Module,
@@ -14,16 +14,19 @@ def train_step(
     device: torch.device,
     disable_progress_bar: bool = False
 ) -> Tuple[float, float]:
-    """single epoch for train
+    """single epoch for train 
 
     Args:
-        epochs (int): _description_
+        current_epoch (int): _description_
         model (torch.nn.Module): _description_
         train_dataloader (torch.utils.data.DataLoader): _description_
         loss_func (torch.nn.Module): _description_
         optimizer (torch.optim.Optimizer): _description_
         device (torch.device): _description_
         disable_progress_bar (bool, optional): _description_. Defaults to False.
+
+    Returns:
+        Tuple[float, float]: _description_
     """
     
     model.train()
@@ -31,7 +34,7 @@ def train_step(
     
     progress_bar = tqdm(
         iterable=enumerate(train_dataloader),
-        desc=f"Training Epoch {epochs}",
+        desc=f"Training Epoch {current_epoch}",
         total=len(train_dataloader),
         disable=disable_progress_bar
     )
@@ -66,7 +69,7 @@ def train_step(
 
 
 def test_step(
-    epochs: int,
+    current_epoch: int,
     model: torch.nn.Module,
     test_dataloader: torch.utils.data.DataLoader,
     loss_func: torch.nn.Module,
@@ -76,7 +79,7 @@ def test_step(
     """ Test single epoch in Test
 
     Args:
-        epochs (int): _description_
+        current_epoch (int): _description_
         model (torch.nn.Module): _description_
         test_dataloader (torch.utils.data.DataLoader): _description_
         loss_func (torch.nn.Module): _description_
@@ -92,7 +95,7 @@ def test_step(
     
     progress_bar = tqdm(
         iterable=enumerate(test_dataloader),
-        desc=f"Testing Epoch {epochs}",
+        desc=f"Testing Epoch {current_epoch}",
         total=len(test_dataloader),
         disable=disable_progress_bar
     )
@@ -131,7 +134,7 @@ def train(
     optimizer: torch.optim.Optimizer,
     device: torch.device,
     disable_progress_bar: bool = False
-) -> Tuple[str, List]:
+) -> Dict[str, List]:
     """summary function
 
     Args:
@@ -157,14 +160,16 @@ def train(
     }
     
     for epoch in tqdm(range(epochs), disable=disable_progress_bar):
+        current_epoch = epoch + 1
+        
         train_epoch_start_time = time.time()
-        train_loss, train_acc = train_step(epoch, model, train_dataloader, loss_func, optimizer, device, disable_progress_bar)
+        train_loss, train_acc = train_step(current_epoch, model, train_dataloader, loss_func, optimizer, device, disable_progress_bar)
         train_epoch_end_time = time.time()
         
         train_epoch_time = train_epoch_end_time - train_epoch_start_time
 
         test_epoch_start_time = time.time()
-        test_loss, test_acc = test_step(epoch, model, test_dataloader, loss_func, device, disable_progress_bar)
+        test_loss, test_acc = test_step(current_epoch, model, test_dataloader, loss_func, device, disable_progress_bar)
         test_epoch_end_time = time.time()
         
         test_epoch_time = test_epoch_end_time - test_epoch_start_time
@@ -175,7 +180,7 @@ def train(
             f"train_acc: {train_acc:.4f} |"
             f"test_loss: {test_loss:.4f} |"
             f"test_acc: {test_acc:.4f} |"
-            f"train_epoch_time: {train_epoch_time:.4f} |"
+            f"train_epoch_time: {train_epoch_time:.5f} |"
             f"test_epoch_time: {test_epoch_time:.4f} |"
         )
         

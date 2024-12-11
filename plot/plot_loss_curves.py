@@ -12,6 +12,7 @@ def plot_loss_curves(results):
             "test_acc": [...]
         }
     """
+    print("plot")
     
     train_loss = results["train_loss"]
     test_loss = results["test_loss"]
@@ -38,3 +39,5 @@ def plot_loss_curves(results):
     plt.title("Accuracy")
     plt.xlabel("Epochs")
     plt.legend()
+    
+    plt.show()
